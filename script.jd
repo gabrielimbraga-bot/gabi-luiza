@@ -1,0 +1,189 @@
+// ELEMENTOS DA BUSCA E DOS FILTROS
+
+const searchInput = document.getElementById("searchBrand");
+const typeFilter = document.getElementById("typeFilter");
+const priceFilter = document.getElementById("priceFilter");
+
+const productCards = [
+  ...document.querySelectorAll(".product-card")
+];
+
+// FILTRAR MARCAS E PRODUTOS
+
+function filterProducts() {
+  const term = searchInput.value
+    .trim()
+    .toLocaleLowerCase("pt-BR");
+
+  const type = typeFilter.value;
+  const price = priceFilter.value;
+
+  let shown = 0;
+
+  productCards.forEach(card => {
+    const name = (
+      card.dataset.name + " " + card.innerText
+    ).toLocaleLowerCase("pt-BR");
+
+    const types = card.dataset.type.split(" ");
+
+    const typeMatch =
+      type === "todos" || types.includes(type);
+
+    const priceMatch =
+      price === "todos" ||
+      card.dataset.price === price;
+
+    const visible =
+      name.includes(term) &&
+      typeMatch &&
+      priceMatch;
+
+    card.hidden = !visible;
+
+    if (visible) {
+      shown++;
+    }
+  });
+
+  // MENSAGEM QUANDO NENHUM PRODUTO FOR ENCONTRADO
+
+  let empty = document.getElementById("emptyProducts");
+
+  if (!shown && !empty) {
+    empty = document.createElement("div");
+
+    empty.id = "emptyProducts";
+    empty.className = "empty";
+
+    empty.textContent =
+      "Nenhuma opção encontrada. Tente mudar a busca ou os filtros.";
+
+    document
+      .getElementById("productGrid")
+      .appendChild(empty);
+
+  } else if (shown && empty) {
+    empty.remove();
+  }
+}
+
+// ATUALIZAR OS RESULTADOS AO INTERAGIR
+
+searchInput.addEventListener("input", filterProducts);
+
+typeFilter.addEventListener("change", filterProducts);
+
+priceFilter.addEventListener("change", filterProducts);
+
+
+// MONTAR UM KIT PERSONALIZADO
+
+document.getElementById("makeKit").addEventListener("click", () => {
+
+  const style = document.getElementById("studyStyle").value;
+
+  const budget = Math.max(
+    5,
+    Number(document.getElementById("budget").value) || 5
+  );
+
+  const result = document.getElementById("kitResult");
+
+  let title;
+  let items;
+  let low;
+  let high;
+
+  // OPÇÃO 1: RESUMOS E ANOTAÇÕES
+
+  if (style === "resumos") {
+
+    title = "Kit para resumos";
+
+    items = [
+      "2–4 canetas coloridas para separar temas",
+      "1 caneta de 0,5 ou 0,7 mm para o texto principal",
+      "1 ponta fina para detalhes e esquemas"
+    ];
+
+    low = 18;
+    high = 40;
+
+  // OPÇÃO 2: DESENHOS E MAPAS MENTAIS
+
+  } else if (style === "desenho") {
+
+    title = "Kit para mapas e desenhos";
+
+    items = [
+      "3–6 cores que contrastem entre si",
+      "1 fineliner de ponta fina para contornos",
+      "1 caneta de ponta média para títulos"
+    ];
+
+    low = 25;
+    high = 65;
+
+  // OPÇÃO 3: PLANNER E ORGANIZAÇÃO
+
+  } else if (style === "planner") {
+
+    title = "Kit para planner";
+
+    items = [
+      "2 cores principais e 1 cor de destaque",
+      "1 caneta fina para datas e legendas",
+      "1 caneta de escrita confortável"
+    ];
+
+    low = 15;
+    high = 45;
+
+  // OPÇÃO 4: PREPARAÇÃO PARA O ENEM
+
+  } else {
+
+    title = "Kit para o ENEM";
+
+    items = [
+      "2 ou 3 esferográficas pretas de corpo transparente, conforme o edital",
+      "1 caneta reserva testada antes da prova",
+      "Canetas coloridas apenas para os estudos, não para preencher a prova"
+    ];
+
+    low = 6;
+    high = 25;
+  }
+
+  // CALCULAR A ESTIMATIVA DENTRO DO ORÇAMENTO
+
+  const estimateLow = Math.min(low, budget);
+
+  const estimateHigh = Math.min(
+    high,
+    Math.max(estimateLow, budget)
+  );
+
+  // MOSTRAR O RESULTADO NA PÁGINA
+
+  result.innerHTML = `
+    <span class="kicker">SUA SUGESTÃO</span>
+
+    <h3>${title}</h3>
+
+    <strong>
+      R$ ${estimateLow}–${estimateHigh}
+    </strong>
+
+    <ul>
+      ${items.map(item => `<li>${item}</li>`).join("")}
+    </ul>
+
+    <p class="small">
+      Estimativa orientativa para montar uma lista de compras
+      dentro do seu orçamento. Compare preços e priorize
+      o que você realmente vai usar.
+    </p>
+  `;
+});
